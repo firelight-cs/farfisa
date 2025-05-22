@@ -3,7 +3,7 @@ from PIL import Image, ImageTk, ImageSequence
 from tkinter import filedialog, messagebox
 import json
 import os
-
+# GUI for Farfisa
 class ImageObserver:
     def __init__(self, master):
         self.master = master
@@ -28,12 +28,18 @@ class ImageObserver:
 
         btn_frame = tk.Frame(self.master)
         btn_frame.pack()
+
         prev_button = tk.Button(btn_frame, text=" << Previous", command=self.show_previous_image)
         prev_button.grid(row=0, column=0, padx=5)
+
         next_button = tk.Button(btn_frame, text="Next >>", command=self.show_next_image)
         next_button.grid(row=0, column=1, padx=5)
+
         json_button = tk.Button(btn_frame, text="Load JSON", command=self.open_json_window)
         json_button.grid(row=0, column=2, padx=5)
+
+        input_btn = tk.Button(btn_frame, text="Chat", command=self.open_input_window)
+        input_btn.grid(row=0, column=3, padx=5)
 
         self.photo = None
         self.show_image()
@@ -106,6 +112,33 @@ class ImageObserver:
         pretty = json.dumps(data, indent=2, ensure_ascii=False)
         text.insert('1.0', pretty)
         text.config(state='disabled')
+
+
+    def open_input_window(self):
+        win = tk.Toplevel(self.master)
+        win.title("Chat With Me")
+        tk.Label(win, text="Message:").pack(padx=10, pady=(10,0))
+        entry = tk.Entry(win, width=50)
+        entry.pack(padx=10, pady=5)
+        entry.focus_set()
+
+        def send_message(event=None):
+            message = entry.get().strip()
+            if not message:
+                messagebox.showerror("Empty", "Please enter a message.")
+                return
+            win.destroy()
+            self.show_message_window(message)
+
+        entry.bind('<Return>', send_message)
+        send_btn = tk.Button(win, text="Send", command=send_message)
+        send_btn.pack(pady=(0, 10))
+
+
+    def show_message_window(self, message):
+        win = tk.Toplevel(self.master)
+        win.title("Your message: ")
+        tk.Label(win, text=message, wraplength=400, justify='left').pack(padx=10, pady=10)
 
 
 if __name__ == "__main__":
