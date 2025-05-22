@@ -1,6 +1,8 @@
 import tkinter as tk
 from PIL import Image, ImageTk, ImageSequence
 from tkinter import filedialog, messagebox
+import json
+import os
 
 class ImageObserver:
     def __init__(self, master):
@@ -30,6 +32,8 @@ class ImageObserver:
         prev_button.grid(row=0, column=0, padx=5)
         next_button = tk.Button(btn_frame, text="Next >>", command=self.show_next_image)
         next_button.grid(row=0, column=1, padx=5)
+        json_button = tk.Button(btn_frame, text="Load JSON", command=self.open_json_window)
+        json_button.grid(row=0, column=2, padx=5)
 
         self.photo = None
         self.show_image()
@@ -73,6 +77,35 @@ class ImageObserver:
             self.show_image()
         else:
             messagebox.showerror("Error", "This is the first image.")
+
+    def open_json_window(self):
+        path = filedialog.askopenfilename(
+            title="Select JSON File",
+            filetypes=(("JSON Files", "*.json"), ("All Files", "*.*")),
+        )
+        if not path:
+            return
+        try:
+            with open(path, 'r', encoding = 'utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load JSON file: {e}")
+            return
+
+        win = tk.Toplevel(self.master)
+        win.title(f"Json Viewer - {os.path.basename(path)}")
+
+        text = tk.Text(win, wrap='none')
+        text.pack(fill='both', expand=True)
+        xscroll = tk.Scrollbar(win, orient='horizontal', command=text.xview)
+        yscroll = tk.Scrollbar(win, orient='vertical', command=text.yview)
+        xscroll.pack(side='bottom', fill='x')
+        yscroll.pack(side='right', fill='y')
+        text.config(xscrollcommand=xscroll.set, yscrollcommand=yscroll.set)
+
+        pretty = json.dumps(data, indent=2, ensure_ascii=False)
+        text.insert('1.0', pretty)
+        text.config(state='disabled')
 
 
 if __name__ == "__main__":
